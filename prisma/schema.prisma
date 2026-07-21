@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model CarType {
+  id        String   @id @default(uuid())
+  title     String
+  cars      Car[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Car {
+  id        String    @id @default(uuid())
+  slug      String    @unique
+  //car info
+  carTypeId String
+  carType   CarType   @relation(fields: [carTypeId], references: [id])
+  subTitle  String
+  location  Locations
+  seats     Int
+ 
+
+  availableCars Int
+
+  fuel               Fuel
+  //apperance
+  image              String
+  //pricing
+  pricing            Json
+  bookings           Booking[]
+  extraOptions       ExtraOptions[]
+  //rental details
+  kmIncluded         Float
+  minimumRentalHours Int
+  deposit            Float
+
+  disabled  Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExtraOptions {
+  id        String   @id @default(uuid())
+  title     String
+  price     Float
+  carId     String
+  daily     Boolean  @default(false)
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id                   String        @id @default(uuid())
+  bookingID            String        @unique
+  //driver detais
+  email                String
+  firstName            String
+  middleName           String
+  lastName             String
+  contactNumber        String
+  //billing address
+  billingFirstName     String
+  billingMiddleName    String
+  billingLastName      String
+  billingContactNumber String
+  address              String
+  City                 String
+  State                String
+  Zipcode              String
+  //required documents
+  license              String
+  insurance            String
+  returnFlight         String
+  //date
+  startDate            DateTime
+  endDate              DateTime
+  //is business
+  business             Boolean?
+  companyName          String?
+  companyVat           String?
+  //location
+  pickupLocation       String
+  dropoffLocation      String?
+  //prices
+  price                Float
+  totalAmount          Float
+  payNow               Float
+  paymentMethod        PaymentMethod @default(CARD)
+  extraOptions         Json
+  //status
+  status               BookingStatus @default(PENDING)
+
+  oneWayFee             Boolean   @default(false)
+  terms                Boolean
+
+  carId String
+  car   Car    @relation(fields: [carId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlogCategory {
+  id    String @id @default(uuid())
+  title String
+
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Blog {
+  id             String       @id @default(uuid())
+  slug           String       @unique
+  title          String
+  seoDescription String
+  content        String
+  categoryId     String
+  featuredImage  String
+  category       BlogCategory @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id             String   @id @default("settings")
+  companyName    String
+  email          String
+  password       String
+  phoneNumber    String
+  whatsAppNumber String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+//enums
+
+enum Fuel {
+  GASOLINE
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+enum PaymentMethod {
+  CARD
+}
+
+enum Locations {
+  LOS_ANGELES
+  LAS_VEGAS
+  ORLANDO
+}
+
+enum BookingStatus {
+  PAID
+  PENDING
+  CANCELLED
+}
